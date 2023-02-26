@@ -9,18 +9,24 @@ public class Location {
     private final String description;
     private final Map<String, Integer> exits;
 
-    public Location(int locationID, String description) {
+    public Location(int locationID, String description, Map<String, Integer> exits) {
         this.locationID = locationID;
         this.description = description;
-        this.exits = new HashMap<String, Integer>();
-        //map is generated for each object which will consist of possible exits which we will define through the instance,
-        //but not during construction
-        this.exits.put("Q", 0); //quit key/value pair added to the map of each Location instance
+//        this.exits = exits;
+        if (exits != null) { //this prevents a null pointer exception, were a 'null' value to be passed as argumnet for Map
+            // which would crash the program at runtime if  constructor did not account for possibility of null as map value
+            this.exits = new HashMap<String, Integer>(exits);
+        } else {
+            this.exits = new HashMap<>(); //if null, creates map with no content
+        }
+        //map is now a passed parameter in constructor method
+        this.exits.put("Q", 0);
     }
 
-    public void addExit(String direction, int location) {
-        exits.put(direction, location);
-    }
+//    public void addExit(String direction, int location) {
+//        exits.put(direction, location);
+//    }
+
     public int getLocationID() {
         return locationID;
     }

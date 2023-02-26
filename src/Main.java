@@ -4,35 +4,53 @@ import java.util.Scanner;
 
 public class Main {
     private static Map<Integer, Location> locations = new HashMap<Integer, Location>();
+    // this employs generics, where the dangere is that if Location class is left mutable (non-final) then subclasses
+    //could be created and their instances used in the map as a value, which may break stuff
 
     public static void main(String[] args) {
+        // Change the program to allow players to type full words, or phrases, then move to the
+        // correct location based upon their input.
+        // The player should be able to type commands such as "Go West", "run South", or just "East"
+        // and the program will move to the appropriate location if there is one.  As at present, an
+        // attempt to move in an invalid direction should print a message and remain in the same place.
+        //
+        // Single letter commands (N, W, S, E, Q) should still be available.
 
 	    Scanner scanner = new Scanner(System.in);
 
-        locations.put(0, new Location(0, "You are sitting in front of a computer learning Java"));
-        locations.put(1, new Location(1, "You are standing at the end of a road before a small brick building"));
-        locations.put(2, new Location(2, "You are at the top of a hill"));
-        locations.put(3, new Location(3, "You are inside a building, a well house for a small spring"));
-        locations.put(4, new Location(4, "You are in a valley beside a stream"));
-        locations.put(5, new Location(5, "You are in the forest"));
+        Map<String, Integer> tempExit = new HashMap<String, Integer>();
+        locations.put(0, new Location(0, "You are sitting in front of a computer learning Java",tempExit));
+        //tempExit is empty but passed as necessary parameter for constructor
 
-        locations.get(1).addExit("W", 2);
-        locations.get(1).addExit("E", 3);
-        locations.get(1).addExit("S", 4);
-        locations.get(1).addExit("N", 5);
+        tempExit = new HashMap<String, Integer>();
+        //not sure how the same tempExit variable can reference different hashmap objects but problem for later
+        //a new version os tempexit apparenetly created and then used as parameeter value for new location which takes the map out of
+        // main class and hides it in the Location class instance. this is done for each location instance
+        tempExit.put("W", 2);
+        tempExit.put("E", 3);
+        tempExit.put("S", 4);
+        tempExit.put("N", 5);
+        locations.put(1, new Location(1, "You are standing at the end of a road before a small brick building",tempExit));
 
-        locations.get(2).addExit("N", 5);
+        tempExit = new HashMap<String, Integer>();
+        tempExit.put("N", 5);
+        locations.put(2, new Location(2, "You are at the top of a hill",tempExit));
 
-        locations.get(3).addExit("W", 1);
+        tempExit = new HashMap<String, Integer>();
+        tempExit.put("W", 1);
+        locations.put(3, new Location(3, "You are inside a building, a well house for a small spring",tempExit));
 
-        locations.get(4).addExit("N", 1);
-        locations.get(4).addExit("W", 2);
+        tempExit = new HashMap<String, Integer>();
+        tempExit.put("N", 1);
+        tempExit.put("W", 2);
+        locations.put(4, new Location(4, "You are in a valley beside a stream",tempExit));
 
-        locations.get(5).addExit("S", 1);
-        locations.get(5).addExit("W", 2);
+        tempExit = new HashMap<String, Integer>();
+        tempExit.put("S", 1);
+        tempExit.put("W", 2);
+        locations.put(5, new Location(5, "You are in the forest",tempExit));
 
-        Map<String, String> vocabulary = new HashMap<String, String>(); // map created with key of full direction name and value
-        // is abbreviated direction to use in searching a Location instance's map
+        Map<String, String> vocabulary = new HashMap<String, String>();
         vocabulary.put("QUIT", "Q");
         vocabulary.put("NORTH", "N");
         vocabulary.put("SOUTH", "S");
@@ -43,6 +61,11 @@ public class Main {
         int loc = 1;
         while(true) {
             System.out.println(locations.get(loc).getDescription());
+            tempExit.remove("S"); //this effectively removes "S" from the last instance of tempExit BUT it doesn't matter because
+            // temp exit was passed as a parameter during construction of the Location instance and then the instance field exits of Map
+            // type is a NEW Map defined as a COPY of tempExits, such that when tempExits is modified, it doesn't matter since the new copy
+            // of temp exit in the instance field is independent of the original tempExit Map.
+
             if(loc == 0) {
                 break;
             }
@@ -54,21 +77,15 @@ public class Main {
             }
             System.out.println();
 
-            String direction = scanner.nextLine().toUpperCase(); //string input from user
-            if(direction.length() > 1) { // programs states directions such as "N,W,S,E,Q" but user allowed to input full
-                // sentences like "run north". if the length of the string is greater than 1, then
-                String[] words = direction.split(" "); // array of string values created, where each string is a word from user sentence
-                for(String word: words) { //enhanced for loop goes through the String array and querry's the vocabulary map for presence of
-                    // each word in user sentence
-                    if(vocabulary.containsKey(word)) { //if the word found such as "north" , then 'direction' is set to the VALUE of the key 'north'
-                        //it will define direction as the FIRST direction in the sentence as it loops through. saying "south then west" will just stop
-                        //the loop once 'south' is found
+            String direction = scanner.nextLine().toUpperCase();
+            if(direction.length() > 1) {
+                String[] words = direction.split(" ");
+                for(String word: words) {
+                    if(vocabulary.containsKey(word)) {
                         direction = vocabulary.get(word);
                         break;
                     }
                 }
-                //note that the user can input a single letter like 'N' or full word 'north' or sentence containing 'north' but partial
-                //spelling like 'nort' will state direction not found
             }
 
             if(exits.containsKey(direction)) {
