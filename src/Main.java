@@ -6,6 +6,7 @@ public class Main {
     private static Map<Integer, Location> locations = new HashMap<Integer, Location>();
 
     public static void main(String[] args) {
+
 	    Scanner scanner = new Scanner(System.in);
 
         locations.put(0, new Location(0, "You are sitting in front of a computer learning Java"));
@@ -15,33 +16,29 @@ public class Main {
         locations.put(4, new Location(4, "You are in a valley beside a stream"));
         locations.put(5, new Location(5, "You are in the forest"));
 
-        //exits created for each location object to create acceptable pathways from location to location
-
-        locations.get(1).addExit("W", 2); //since location 1 is the start, can go anywhere
-        //note that the key is a string and returns a value of an int which java will read as the new location
+        locations.get(1).addExit("W", 2);
         locations.get(1).addExit("E", 3);
         locations.get(1).addExit("S", 4);
         locations.get(1).addExit("N", 5);
-//        locations.get(1).addExit("Q", 0);
-        //to avoid redundancy, all "Q", 0 key/value pairs have been removed and instead created as part of the map for
-        //each Location instance when the instance is created
-        //note this is interesting what the entire instance and is retrieved AND its map is retrieved, NEITHER of which
-        //have a variable name. This could be useful for the EMR project both with organizing and with traversing the EMR
-        //as a user
 
-        locations.get(2).addExit("N", 5); //not bi-directional, must go north
-//        locations.get(2).addExit("Q", 0);
+        locations.get(2).addExit("N", 5);
 
         locations.get(3).addExit("W", 1);
-//        locations.get(3).addExit("Q", 0);
 
         locations.get(4).addExit("N", 1);
         locations.get(4).addExit("W", 2);
-//        locations.get(4).addExit("Q", 0);
 
         locations.get(5).addExit("S", 1);
         locations.get(5).addExit("W", 2);
-//        locations.get(5).addExit("Q", 0);
+
+        Map<String, String> vocabulary = new HashMap<String, String>(); // map created with key of full direction name and value
+        // is abbreviated direction to use in searching a Location instance's map
+        vocabulary.put("QUIT", "Q");
+        vocabulary.put("NORTH", "N");
+        vocabulary.put("SOUTH", "S");
+        vocabulary.put("WEST", "W");
+        vocabulary.put("EAST", "E");
+
 
         int loc = 1;
         while(true) {
@@ -50,22 +47,32 @@ public class Main {
                 break;
             }
 
-            Map<String, Integer> exits = locations.get(loc).getExits(); // this returns a copy of the exits map
-            // for each Location instance
+            Map<String, Integer> exits = locations.get(loc).getExits();
             System.out.print("Available exits are ");
-            for(String exit: exits.keySet()) { //for loop prints all available exists within the Location instance's map
+            for(String exit: exits.keySet()) {
                 System.out.print(exit + ", ");
             }
             System.out.println();
 
-            String direction = scanner.nextLine().toUpperCase(); //user states direction they want to go
+            String direction = scanner.nextLine().toUpperCase(); //string input from user
+            if(direction.length() > 1) { // programs states directions such as "N,W,S,E,Q" but user allowed to input full
+                // sentences like "run north". if the length of the string is greater than 1, then
+                String[] words = direction.split(" "); // array of string values created, where each string is a word from user sentence
+                for(String word: words) { //enhanced for loop goes through the String array and querry's the vocabulary map for presence of
+                    // each word in user sentence
+                    if(vocabulary.containsKey(word)) { //if the word found such as "north" , then 'direction' is set to the VALUE of the key 'north'
+                        //it will define direction as the FIRST direction in the sentence as it loops through. saying "south then west" will just stop
+                        //the loop once 'south' is found
+                        direction = vocabulary.get(word);
+                        break;
+                    }
+                }
+                //note that the user can input a single letter like 'N' or full word 'north' or sentence containing 'north' but partial
+                //spelling like 'nort' will state direction not found
+            }
 
-            if(exits.containsKey(direction)) { //if the copy of the Location instance's map contains the user input
-                loc = exits.get(direction); // cardinal direction is the key and returns the key's value, which is an int
-
-                //now that 'loc' int variable is redefined, we go back to the top of the loop, use the loc value to search
-                //the 'locations' map for the int type key, then retrieve the instance of Location associated with that key
-                // and get its field value for description
+            if(exits.containsKey(direction)) {
+                loc = exits.get(direction);
 
             } else {
                 System.out.println("You cannot go in that direction");
