@@ -13,6 +13,9 @@ public class Location {
         this.locationID = locationID;
         this.description = description;
         this.exits = new HashMap<String, Integer>();
+        //map is generated for each object which will consist of possible exits which we will define through the instance,
+        //but not during construction
+        this.exits.put("Q", 0); //quit key/value pair added to the map of each Location instance
     }
 
     public void addExit(String direction, int location) {
@@ -29,5 +32,4 @@ public class Location {
     public Map<String, Integer> getExits() {
         return new HashMap<String, Integer>(exits);
     }
-    //returns a copy of the Map key/values. relates to preventing unintended code alteration?
 }
